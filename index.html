@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Groupe du Nom et l'Indicatif Présent</title>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5', // Indigo 600
+                        secondary: '#10B981', // Emerald 500
+                        accent: '#F59E0B', // Amber 500
+                        background: '#F3F4F6', // Gray 100
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts for a kid-friendly look -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- MANDATORY BABEL CONFIGURATION -->
+    <script>
+      Babel.registerPreset('react-classic', {
+        presets: [
+          [Babel.availablePresets['react'], { runtime: 'classic' }]
+        ]
+      });
+    </script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F0F9FF; /* Light blue background */
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bounce-hover:hover {
+            transform: scale(1.02) translateY(-2px);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .correct-anim {
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background-color: #D1FAE5 !important;
+            border-color: #10B981 !important;
+            color: #065F46 !important;
+        }
+        
+        .incorrect-anim {
+            animation: shake 0.4s ease-in-out;
+            background-color: #FEE2E2 !important;
+            border-color: #EF4444 !important;
+            color: #991B1B !important;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module" data-presets="react-classic">
+        const { useState, useEffect, useRef } = React;
+
+        const CheckCircle = () => (
+            <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        );
+        const XCircle = () => (
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        );
+        const Star = ({ filled }) => (
+            <svg className={`w-12 h-12 ${filled ? 'text-yellow-400 drop-shadow-md' : 'text-gray-300'}`} fill={filled ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+        );
+        const BookOpen = () => (
+            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+        );
+        const Pencil = () => (
+            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+        );
+
+        const dataTab1 = [
+            {
+                type: 'explanation',
+                title: 'Qu\'est-ce qu\'un Groupe du Nom (GN) ?',
+                content: (
+                    <div className="space-y-4 text-lg">
+                        <p>Le <strong>groupe du nom (GN)</strong> est un groupe de mots qui a un <strong>nom</strong> comme chef. On l'appelle le <strong>noyau</strong>.</p>
+                        <div className="bg-white p-6 rounded-xl border-2 border-indigo-200 shadow-sm flex flex-col items-center">
+                            <p className="text-xl font-bold mb-4">Composition du GN :</p>
+                            <div className="flex flex-wrap justify-center gap-4">
+                                <div className="bg-blue-100 p-3 rounded-lg text-center w-32 border-2 border-blue-300">
+                                    <span className="text-sm text-blue-700 font-bold block mb-1">Déterminant</span>
+                                    <span className="text-xl">Le</span>
+                                </div>
+                                <span className="text-2xl font-bold text-gray-400 self-center">+</span>
+                                <div className="bg-purple-100 p-3 rounded-lg text-center w-32 border-2 border-purple-300 shadow-md transform scale-110">
+                                    <span className="text-sm text-purple-700 font-bold block mb-1">Nom (Noyau)</span>
+                                    <span className="text-xl font-bold">tableau</span>
+                                </div>
+                                <span className="text-2xl font-bold text-gray-400 self-center">+</span>
+                                <div className="bg-green-100 p-3 rounded-lg text-center w-32 border-2 border-green-300">
+                                    <span className="text-sm text-green-700 font-bold block mb-1">Adjectif (Expansion)</span>
+                                    <span className="text-xl">blanc</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p className="bg-yellow-50 p-4 border-l-4 border-yellow-400 rounded-r-lg text-yellow-800">
+                            <strong>Attention :</strong> C'est le <strong>nom (noyau)</strong> qui donne son genre (masculin/féminin) et son nombre (singulier/pluriel) aux autres mots du groupe !
+                        </p>
+                    </div>
+                )
+            },
+            {
+                type: 'mcq',
+                title: 'Trouve le noyau !',
+                question: 'Dans le GN "mes nouveaux crayons", quel est le nom noyau ?',
+                options: ['mes', 'nouveaux', 'crayons'],
+                correctIndex: 2,
+                feedback: 'Bravo ! "crayons" est le nom. Il dicte l\'accord aux autres mots (masculin pluriel).'
+            },
+            {
+                type: 'true_false',
+                title: 'Vrai ou Faux ?',
+                question: 'Le déterminant peut être effacé d\'un groupe du nom sans que la phrase perde son sens.',
+                correctAnswer: false,
+                feedback: 'Faux ! Le déterminant est obligatoire (sauf exceptions rares). L\'expansion (l\'adjectif), elle, peut être effacée.'
+            },
+            {
+                type: 'interactive_click',
+                title: 'La chaîne d\'accord',
+                instruction: 'Clique sur le mot qui a donné son accord (le donneur) dans ce GN.',
+                sentence: [
+                    { word: 'Les', type: 'det' },
+                    { word: 'grandes', type: 'adj' },
+                    { word: 'écoles', type: 'noun' }
+                ],
+                correctType: 'noun',
+                feedback: 'Excellent ! Le nom "écoles" (féminin pluriel) donne son accord au déterminant "Les" et à l\'adjectif "grandes".'
+            },
+            {
+                type: 'mcq',
+                title: 'Mission Correction !',
+                question: 'Le professeur a écrit : "Les petit élève travaillent bien." Choisis la bonne correction du GN.',
+                options: [
+                    'Le petits élèves',
+                    'Les petits élèves',
+                    'Les petit élèves'
+                ],
+                correctIndex: 1,
+                feedback: 'Parfait ! Le nom noyau "élèves" est au pluriel (à cause du déterminant "Les"), donc l\'adjectif "petit" prend aussi un "s".'
+            }
+        ];
+
+        const dataTab2 = [
+            {
+                type: 'explanation',
+                title: 'Le présent de l\'indicatif',
+                content: (
+                    <div className="space-y-4 text-lg">
+                        <p>Le <strong>présent</strong> sert à parler d'une action qui se déroule <strong>maintenant</strong>, en ce moment.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+                                <h3 className="font-bold text-indigo-800 mb-2 border-b-2 border-indigo-200 pb-1">Verbes en -ER (ex: AIMER)</h3>
+                                <ul className="text-left space-y-1 ml-4 font-mono">
+                                    <li>J'aim<strong className="text-indigo-600">e</strong></li>
+                                    <li>Tu aim<strong className="text-indigo-600">es</strong></li>
+                                    <li>Il/Elle aim<strong className="text-indigo-600">e</strong></li>
+                                    <li>Nous aim<strong className="text-indigo-600">ons</strong></li>
+                                    <li>Vous aim<strong className="text-indigo-600">ez</strong></li>
+                                    <li>Ils/Elles aim<strong className="text-indigo-600">ent</strong></li>
+                                </ul>
+                            </div>
+                            <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
+                                <h3 className="font-bold text-emerald-800 mb-2 border-b-2 border-emerald-200 pb-1">Verbes en -IR (ex: FINIR)</h3>
+                                <ul className="text-left space-y-1 ml-4 font-mono">
+                                    <li>Je fini<strong className="text-emerald-600">s</strong></li>
+                                    <li>Tu fini<strong className="text-emerald-600">s</strong></li>
+                                    <li>Il/Elle fini<strong className="text-emerald-600">t</strong></li>
+                                    <li>Nous finiss<strong className="text-emerald-600">ons</strong></li>
+                                    <li>Vous finiss<strong className="text-emerald-600">ez</strong></li>
+                                    <li>Ils/Elles finiss<strong className="text-emerald-600">ent</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )
+            },
+            {
+                type: 'explanation',
+                title: 'Les verbes irréguliers (Les stars !)',
+                content: (
+                    <div className="space-y-4 text-lg">
+                        <p>Les verbes <strong>avoir, être et aller</strong> ne suivent pas les règles normales. Il faut les apprendre par cœur !</p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm md:text-base">
+                            <div className="bg-yellow-50 p-3 rounded-xl border border-yellow-300">
+                                <h3 className="font-bold text-yellow-800 text-center mb-2">AVOIR</h3>
+                                <ul className="text-center font-mono">
+                                    <li>J'ai</li><li>Tu as</li><li>Il a</li>
+                                    <li>Nous avons</li><li>Vous avez</li><li>Ils ont</li>
+                                </ul>
+                            </div>
+                            <div className="bg-blue-50 p-3 rounded-xl border border-blue-300">
+                                <h3 className="font-bold text-blue-800 text-center mb-2">ÊTRE</h3>
+                                <ul className="text-center font-mono">
+                                    <li>Je suis</li><li>Tu es</li><li>Il est</li>
+                                    <li>Nous sommes</li><li>Vous êtes</li><li>Ils sont</li>
+                                </ul>
+                            </div>
+                            <div className="bg-red-50 p-3 rounded-xl border border-red-300">
+                                <h3 className="font-bold text-red-800 text-center mb-2">ALLER</h3>
+                                <ul className="text-center font-mono">
+                                    <li>Je vais</li><li>Tu vas</li><li>Il va</li>
+                                    <li>Nous allons</li><li>Vous allez</li><li>Ils vont</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )
+            },
+            {
+                type: 'mcq',
+                title: 'Choisis le bon verbe !',
+                question: 'Complète la phrase : "Aujourd\'hui, nous _________ lire un beau conte en classe."',
+                options: ['allons', 'avons', 'sommes'],
+                correctIndex: 0,
+                feedback: 'Exact ! C\'est le verbe ALLER conjugué avec "nous".'
+            },
+            {
+                type: 'true_false',
+                title: 'Vrai ou Faux ?',
+                question: 'La phrase "Je fini toujours mes devoirs" est bien écrite.',
+                correctAnswer: false,
+                feedback: 'Faux ! Avec "Je", le verbe finir prend un "s" au présent : Je finis.'
+            },
+            {
+                type: 'mcq',
+                title: 'Le verbe ÊTRE',
+                question: 'Trouve la bonne conjugaison du verbe ÊTRE pour compléter : "Vous _______ de formidables élèves !"',
+                options: ['êtes', 'avez', 'sont'],
+                correctIndex: 0,
+                feedback: 'Super ! "Vous êtes" est la bonne conjugaison du verbe ÊTRE.'
+            }
+        ];
+
+        const FeedbackDisplay = ({ isCorrect, message, onNext, isLast }) => {
+            if (isCorrect === null) return null;
+            
+            const bgColor = isCorrect ? 'bg-green-100' : 'bg-red-100';
+            const borderColor = isCorrect ? 'border-green-400' : 'border-red-400';
+            const textColor = isCorrect ? 'text-green-800' : 'text-red-800';
+            const Icon = isCorrect ? CheckCircle : XCircle;
+
+            return (
+                <div className={`mt-6 p-6 rounded-2xl border-2 ${bgColor} ${borderColor} ${textColor} fade-in flex flex-col items-center shadow-md`}>
+                    <div className="flex items-center mb-4">
+                        <Icon />
+                        <span className="ml-3 text-2xl font-bold">{isCorrect ? 'Excellent !' : 'Oups !'}</span>
+                    </div>
+                    <p className="text-lg text-center mb-6 font-medium">{message}</p>
+                    <button 
+                        onClick={onNext}
+                        className={`px-8 py-4 rounded-full font-bold text-white text-xl shadow-lg transition-transform hover:scale-105 active:scale-95 ${isCorrect ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+                    >
+                        {isLast ? 'Voir mes résultats 🏆' : 'Question suivante ➡️'}
+                    </button>
+                </div>
+            );
+        };
+
+        const PrimaryButton = ({ onClick, children, disabled, className = '' }) => (
+            <button 
+                onClick={onClick} 
+                disabled={disabled}
+                className={`px-8 py-4 rounded-full font-bold text-xl text-white shadow-lg transition-all 
+                ${disabled ? 'bg-gray-400 cursor-not-allowed opacity-50' : 'bg-primary hover:bg-indigo-700 hover:shadow-xl active:scale-95'} ${className}`}
+            >
+                {children}
+            </button>
+        );
+
+        const ExplanationScreen = ({ data, onNext }) => (
+            <div className="flex flex-col h-full fade-in">
+                <h2 className="text-3xl font-extrabold text-indigo-900 mb-6 text-center border-b-4 border-indigo-200 pb-4">{data.title}</h2>
+                <div className="flex-grow flex items-center justify-center">
+                    <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 w-full max-w-3xl text-gray-800 leading-relaxed">
+                        {data.content}
+                    </div>
+                </div>
+                <div className="mt-8 flex justify-end">
+                    <PrimaryButton onClick={onNext}>J'ai compris, suivant ! 🚀</PrimaryButton>
+                </div>
+            </div>
+        );
+
+        const McqScreen = ({ data, onComplete }) => {
+            const [selected, setSelected] = useState(null);
+            const [hasAnswered, setHasAnswered] = useState(false);
+
+            const handleSelect = (index) => {
+                if (hasAnswered) return;
+                setSelected(index);
+                setHasAnswered(true);
+                const isCorrect = index === data.correctIndex;
+                onComplete(isCorrect, data.feedback);
+            };
+
+            return (
+                <div className="flex flex-col h-full fade-in">
+                    <h2 className="text-3xl font-extrabold text-indigo-900 mb-6 text-center">{data.title}</h2>
+                    <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 flex-grow flex flex-col justify-center">
+                        <p className="text-2xl font-semibold text-gray-800 text-center mb-10">{data.question}</p>
+                        <div className="space-y-4 max-w-2xl mx-auto w-full">
+                            {data.options.map((opt, index) => {
+                                let btnClass = "bg-gray-50 border-gray-200 text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 bounce-hover";
+                                if (hasAnswered) {
+                                    if (index === data.correctIndex) btnClass = "correct-anim pointer-events-none";
+                                    else if (index === selected) btnClass = "incorrect-anim pointer-events-none";
+                                    else btnClass = "bg-gray-100 border-gray-200 text-gray-400 opacity-50 pointer-events-none";
+                                }
+
+                                return (
+                                    <button 
+                                        key={index}
+                                        onClick={() => handleSelect(index)}
+                                        className={`w-full text-left px-8 py-5 rounded-2xl border-4 text-xl font-bold transition-all ${btnClass}`}
+                                    >
+                                        <span className="inline-block w-8 h-8 rounded-full bg-white border-2 border-current text-center leading-7 mr-4 shadow-sm">{String.fromCharCode(65 + index)}</span>
+                                        {opt}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const TrueFalseScreen = ({ data, onComplete }) => {
+            const [selected, setSelected] = useState(null);
+            const [hasAnswered, setHasAnswered] = useState(false);
+
+            const handleSelect = (answer) => {
+                if (hasAnswered) return;
+                setSelected(answer);
+                setHasAnswered(true);
+                const isCorrect = answer === data.correctAnswer;
+                onComplete(isCorrect, data.feedback);
+            };
+
+            const getBtnClass = (isTrueBtn) => {
+                if (!hasAnswered) return "bg-gray-50 border-gray-200 text-gray-700 hover:bg-blue-50 hover:border-blue-300 bounce-hover";
+                
+                const isThisBtnCorrectAnswer = isTrueBtn === data.correctAnswer;
+                
+                if (isThisBtnCorrectAnswer) return "correct-anim pointer-events-none";
+                if (selected === isTrueBtn) return "incorrect-anim pointer-events-none";
+                return "bg-gray-100 border-gray-200 text-gray-400 opacity-50 pointer-events-none";
+            };
+
+            return (
+                <div className="flex flex-col h-full fade-in">
+                    <h2 className="text-3xl font-extrabold text-indigo-900 mb-6 text-center">{data.title}</h2>
+                    <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 flex-grow flex flex-col justify-center items-center">
+                        <p className="text-3xl font-semibold text-gray-800 text-center mb-12 max-w-3xl leading-snug">"{data.question}"</p>
+                        <div className="flex gap-8 w-full max-w-xl justify-center">
+                            <button 
+                                onClick={() => handleSelect(true)}
+                                className={`flex-1 py-8 rounded-3xl border-4 text-3xl font-black transition-all ${getBtnClass(true)}`}
+                            >
+                                VRAI
+                            </button>
+                            <button 
+                                onClick={() => handleSelect(false)}
+                                className={`flex-1 py-8 rounded-3xl border-4 text-3xl font-black transition-all ${getBtnClass(false)}`}
+                            >
+                                FAUX
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const InteractiveClickScreen = ({ data, onComplete }) => {
+            const [clickedIndex, setClickedIndex] = useState(null);
+            const [hasAnswered, setHasAnswered] = useState(false);
+
+            const handleClick = (index, type) => {
+                if (hasAnswered) return;
+                setClickedIndex(index);
+                setHasAnswered(true);
+                const isCorrect = type === data.correctType;
+                onComplete(isCorrect, data.feedback);
+            };
+
+            return (
+                <div className="flex flex-col h-full fade-in">
+                    <h2 className="text-3xl font-extrabold text-indigo-900 mb-4 text-center">{data.title}</h2>
+                    <p className="text-xl text-gray-600 text-center mb-8 bg-white p-4 rounded-full shadow-sm mx-auto inline-block px-8 border border-gray-200">{data.instruction}</p>
+                    
+                    <div className="bg-white p-12 rounded-3xl shadow-lg border border-gray-100 flex-grow flex items-center justify-center">
+                        <div className="flex flex-wrap justify-center gap-4 text-3xl md:text-5xl font-bold">
+                            {data.sentence.map((item, index) => {
+                                let btnClass = "px-6 py-4 rounded-2xl cursor-pointer border-4 border-transparent transition-all bg-gray-100 hover:bg-indigo-100 hover:border-indigo-300 hover:-translate-y-1 hover:shadow-md";
+                                
+                                if (hasAnswered) {
+                                    if (item.type === data.correctType) {
+                                        btnClass = "px-6 py-4 rounded-2xl border-4 correct-anim pointer-events-none";
+                                    } else if (index === clickedIndex) {
+                                        btnClass = "px-6 py-4 rounded-2xl border-4 incorrect-anim pointer-events-none";
+                                    } else {
+                                        btnClass = "px-6 py-4 rounded-2xl border-4 border-transparent bg-gray-50 text-gray-300 pointer-events-none";
+                                    }
+                                }
+
+                                return (
+                                    <span 
+                                        key={index}
+                                        onClick={() => handleClick(index, item.type)}
+                                        className={btnClass}
+                                    >
+                                        {item.word}
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const EndScreen = ({ score, total, onRestart }) => {
+            const percentage = (score / total) * 100;
+            let message = "";
+            let stars = 0;
+            
+            if (percentage === 100) { message = "Parfait ! Tu es un expert !"; stars = 3; }
+            else if (percentage >= 60) { message = "Très bien ! Continue comme ça !"; stars = 2; }
+            else { message = "Bon effort ! N'hésite pas à relire les explications."; stars = 1; }
+
+            return (
+                <div className="bg-white p-10 rounded-3xl shadow-2xl border border-gray-100 text-center fade-in max-w-2xl mx-auto mt-10">
+                    <h2 className="text-4xl font-extrabold text-indigo-900 mb-6">Activité terminée !</h2>
+                    <div className="flex justify-center gap-4 mb-8">
+                        <Star filled={stars >= 1} />
+                        <Star filled={stars >= 2} />
+                        <Star filled={stars >= 3} />
+                    </div>
+                    <p className="text-3xl font-bold text-gray-700 mb-4">Ton score : <span className="text-indigo-600">{score}</span> / {total}</p>
+                    <p className="text-xl text-gray-500 mb-10">{message}</p>
+                    <PrimaryButton onClick={onRestart} className="w-full sm:w-auto px-12">
+                        Refaire l'activité 🔄
+                    </PrimaryButton>
+                </div>
+            );
+        };
+
+        const TabContent = ({ data }) => {
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [score, setScore] = useState(0);
+            const [isFinished, setIsFinished] = useState(false);
+            const [feedbackState, setFeedbackState] = useState({ show: false, isCorrect: null, message: '' });
+
+            // Reset state when tab data changes (user switches tabs)
+            useEffect(() => {
+                setCurrentIndex(0);
+                setScore(0);
+                setIsFinished(false);
+                setFeedbackState({ show: false, isCorrect: null, message: '' });
+            }, [data]);
+
+            const currentActivity = data[currentIndex];
+            const isLast = currentIndex === data.length - 1;
+            
+            // Count total evaluative questions for scoring
+            const totalQuestions = data.filter(d => d.type !== 'explanation').length;
+
+            const handleActivityComplete = (isCorrect, message) => {
+                if (isCorrect) setScore(prev => prev + 1);
+                setFeedbackState({ show: true, isCorrect, message });
+            };
+
+            const handleNext = () => {
+                // Reset feedback state for the next question
+                setFeedbackState({ show: false, isCorrect: null, message: '' });
+                
+                if (isLast) {
+                    setIsFinished(true);
+                } else {
+                    setCurrentIndex(prev => prev + 1);
+                }
+            };
+
+            const handleRestart = () => {
+                setCurrentIndex(0);
+                setScore(0);
+                setIsFinished(false);
+                setFeedbackState({ show: false, isCorrect: null, message: '' });
+            };
+
+            if (isFinished) {
+                return <EndScreen score={score} total={totalQuestions} onRestart={handleRestart} />;
+            }
+
+            // Progress bar calculation
+            const progressPercentage = ((currentIndex + 1) / data.length) * 100;
+
+            return (
+                <div className="flex flex-col h-full min-h-[60vh]">
+                    {/* Progress Bar */}
+                    <div className="w-full bg-gray-200 rounded-full h-3 mb-8 overflow-hidden">
+                        <div 
+                            className="bg-secondary h-3 rounded-full transition-all duration-500 ease-out" 
+                            style={{ width: `${progressPercentage}%` }}
+                        ></div>
+                    </div>
+
+                    {/* Main Content Area - Fluid Height */}
+                    <div className="flex-1 flex flex-col relative">
+                        {/* Render Activity based on type */}
+                        <div className={`flex-1 transition-opacity duration-300 ${feedbackState.show ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                            {currentActivity.type === 'explanation' && <ExplanationScreen data={currentActivity} onNext={handleNext} />}
+                            {currentActivity.type === 'mcq' && <McqScreen data={currentActivity} onComplete={handleActivityComplete} />}
+                            {currentActivity.type === 'true_false' && <TrueFalseScreen data={currentActivity} onComplete={handleActivityComplete} />}
+                            {currentActivity.type === 'interactive_click' && <InteractiveClickScreen data={currentActivity} onComplete={handleActivityComplete} />}
+                        </div>
+                        
+                        {/* Absolute positioned feedback to overlay bottom part or appear clearly */}
+                        {feedbackState.show && (
+                            <div className="mt-4">
+                                <FeedbackDisplay 
+                                    isCorrect={feedbackState.isCorrect} 
+                                    message={feedbackState.message} 
+                                    onNext={handleNext}
+                                    isLast={isLast}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState(1);
+
+            return (
+                <div className="min-h-screen flex flex-col font-sans">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm pt-6 pb-4 px-4 sticky top-0 z-10">
+                        <div className="max-w-5xl mx-auto text-center">
+                            <h1 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary mb-2">
+                                Défi Grammaire & Conjugaison
+                            </h1>
+                            <p className="text-gray-500 font-semibold text-lg">Mission 4e année : Le GN et le Présent</p>
+                        </div>
+                    </header>
+
+                    {/* Main Container */}
+                    <main className="flex-1 max-w-5xl mx-auto w-full p-4 md:p-6 flex flex-col">
+                        
+                        {/* Custom Tab Navigation */}
+                        <div className="flex flex-col md:flex-row justify-center gap-4 mb-8 bg-white p-2 rounded-3xl shadow-sm border border-gray-100">
+                            <button 
+                                onClick={() => setActiveTab(1)}
+                                className={`flex-1 py-4 px-6 rounded-2xl flex items-center justify-center text-xl font-bold transition-all
+                                    ${activeTab === 1 
+                                        ? 'bg-primary text-white shadow-md' 
+                                        : 'bg-transparent text-gray-500 hover:bg-indigo-50 hover:text-indigo-700'}`}
+                            >
+                                <BookOpen />
+                                1. Le Groupe du Nom
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab(2)}
+                                className={`flex-1 py-4 px-6 rounded-2xl flex items-center justify-center text-xl font-bold transition-all
+                                    ${activeTab === 2 
+                                        ? 'bg-secondary text-white shadow-md' 
+                                        : 'bg-transparent text-gray-500 hover:bg-emerald-50 hover:text-emerald-700'}`}
+                            >
+                                <Pencil />
+                                2. Les Verbes (Présent)
+                            </button>
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="flex-1 bg-white/50 backdrop-blur-sm rounded-[2rem] p-4 md:p-8 border-2 border-white shadow-xl relative overflow-hidden">
+                            {/* Decorative background blobs */}
+                            <div className="absolute top-[-50px] left-[-50px] w-64 h-64 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+                            <div className="absolute bottom-[-50px] right-[-50px] w-64 h-64 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
+                            
+                            <div className="relative z-10 h-full flex flex-col">
+                                {activeTab === 1 ? (
+                                    <TabContent key="tab1" data={dataTab1} />
+                                ) : (
+                                    <TabContent key="tab2" data={dataTab2} />
+                                )}
+                            </div>
+                        </div>
+
+                    </main>
+                    
+                    {/* Footer */}
+                    <footer className="text-center p-6 text-gray-400 font-medium text-sm mt-auto">
+                        <p>Application pédagogique conçue pour le TNI et la pratique autonome. (PFEQ - 4e année)</p>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
